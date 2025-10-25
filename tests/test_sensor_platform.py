@@ -213,3 +213,36 @@ async def test_power_values_are_normalized_to_watts(dummy_hass: DummyHass) -> No
     mirror._sync_from_source()  # type: ignore[attr-defined]
     assert mirror.native_value == 500.0  # 0.5 kW -> 500 W
     assert mirror.native_unit_of_measurement == "W"
+
+
+@pytest.mark.asyncio
+async def test_sensor_values_are_rounded_to_two_decimals(dummy_hass: DummyHass) -> None:
+    hass = dummy_hass
+    hass.states.set("sensor.main", "1.23456", {"unit_of_measurement": "kW"})
+    hass.states.set("sensor.consumer", "100.2399", {"unit_of_measurement": "W"})
+    hass.states.set(
+        "sensor.producer",
+        "0.123456",
+        {"unit_of_measurement": "kW", "friendly_name": "PV"},
+    )
+
+    sensor = PowermixOtherSensor(
+        "entry123",
+        "Powermix",
+        "sensor.main",
+        ["sensor.consumer"],
+        [],
+    )
+    sensor.hass = hass
+    sensor._refresh_state()  # type: ignore[attr-defined]
+    assert sensor.native_value == pytest.approx(1134.32)
+
+    mirror = PowermixMirrorSensor(
+        "entry123",
+        "Powermix",
+        "sensor.producer",
+        role="producer",
+    )
+    mirror.hass = hass
+    mirror._sync_from_source()  # type: ignore[attr-defined]
+    assert mirror.native_value == pytest.approx(123.46)

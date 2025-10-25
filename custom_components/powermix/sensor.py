@@ -205,10 +205,10 @@ def _value_in_watts(state: State | None) -> tuple[float | None, str | None]:
     if value is None:
         return None, _unit_label(normalized, unit_attr)
     if normalized == "kW":
-        return value * 1000.0, "W"
+        return _round_native(value * 1000.0), "W"
     if normalized == "W":
-        return value, "W"
-    return value, unit_attr
+        return _round_native(value), "W"
+    return _round_native(value), unit_attr
 
 
 def _normalize_unit(unit: str | None) -> str | None:
@@ -228,3 +228,9 @@ def _unit_label(normalized: str | None, original: str | None) -> str | None:
     if normalized == "kW":
         return "W"
     return original
+
+
+def _round_native(value: float | None) -> float | None:
+    if value is None:
+        return None
+    return round(value, 2)

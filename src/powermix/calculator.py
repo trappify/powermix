@@ -57,7 +57,7 @@ def calculate_other(
             total += parsed
 
     remaining = main_value - total
-    result = round(remaining, 3)
+    result = round(remaining, 2)
     if not allow_negative:
         return max(0.0, result)
     return result

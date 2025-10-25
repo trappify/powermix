@@ -22,3 +22,7 @@ def test_calculate_other_never_negative() -> None:
 
 def test_calculate_other_allows_negative_when_requested() -> None:
     assert calculate_other(10, [15], allow_negative=True) == -5.0
+
+
+def test_calculate_other_rounds_to_two_decimals() -> None:
+    assert calculate_other(10, [3.3333]) == 6.67
