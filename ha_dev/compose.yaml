@@ -1,0 +1,14 @@
+services:
+  homeassistant:
+    container_name: powermix-ha-dev
+    image: ghcr.io/home-assistant/home-assistant:stable
+    user: "${HA_UID:-1000}:${HA_GID:-1000}"
+    environment:
+      - TZ=Europe/Stockholm
+    volumes:
+      - ./config:/config
+      - ../custom_components:/config/custom_components
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "${HA_PORT:-8124}:8123"
+    restart: unless-stopped

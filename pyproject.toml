@@ -1,0 +1,18 @@
+[project]
+name = "powermix"
+version = "0.1.0"
+description = "Home Assistant helper that mirrors power sensors and exposes the remaining usage"
+readme = "README.md"
+requires-python = ">=3.11"
+dynamic = ["dependencies"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "homeassistant>=2024.5.0",
+    "pytest-homeassistant-custom-component>=0.12.0",
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"

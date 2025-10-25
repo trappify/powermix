@@ -1,0 +1,11 @@
+{
+  "domain": "powermix",
+  "name": "Powermix",
+  "codeowners": ["@trappify"],
+  "version": "0.1.0",
+  "documentation": "https://github.com/trappify/powermix",
+  "issue_tracker": "https://github.com/trappify/powermix/issues",
+  "requirements": [],
+  "config_flow": true,
+  "iot_class": "calculated"
+}

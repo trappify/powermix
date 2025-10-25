@@ -1,0 +1,5 @@
+.venv/
+__pycache__/
+.ha-cache/
+.pytest_cache/
+ha_dev/config/

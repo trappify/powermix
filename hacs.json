@@ -1,0 +1,8 @@
+{
+  "name": "Powermix",
+  "content_in_root": false,
+  "domains": ["powermix"],
+  "homeassistant": "2024.5.0",
+  "iot_class": ["calculated"],
+  "render_readme": true
+}

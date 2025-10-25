@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "auth_provider.homeassistant",
+  "data": {
+    "users": [
+      {
+        "username": "powermix",
+        "password": "JDJiJDEyJE80MlBHUjJlaWZQc2JaL29rbEhwOHVKVEdKNW5XVjVIS2xuQlZEaXU0VHQ1MEdnREo5emo2"
+      }
+    ]
+  }
+}

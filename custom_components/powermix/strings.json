@@ -1,0 +1,33 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Main power sensor",
+        "description": "Pick the sensor that represents total household power usage.",
+        "data": {
+          "main_sensor": "Main power sensor"
+        }
+      },
+      "sensors": {
+        "title": "Breakdown sensors",
+        "description": "Choose the sensors you want to subtract and set the prefix for mirrored entities.",
+        "data": {
+          "included_sensors": "Sensors to subtract",
+          "sensor_prefix": "Sensor prefix"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Adjust Powermix sensors",
+        "description": "Update the included sensors or change the prefix.",
+        "data": {
+          "included_sensors": "Sensors to subtract",
+          "sensor_prefix": "Sensor prefix"
+        }
+      }
+    }
+  }
+}

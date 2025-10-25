@@ -1,0 +1,5 @@
+
+[dev]
+pytest
+homeassistant>=2024.5.0
+pytest-homeassistant-custom-component>=0.12.0
