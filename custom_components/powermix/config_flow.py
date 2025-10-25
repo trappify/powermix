@@ -6,6 +6,7 @@ from typing import Any
 
 import voluptuous as vol
 from homeassistant import config_entries
+from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
 
@@ -82,6 +83,11 @@ class PowermixConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return state.attributes.get("friendly_name", self._main_sensor)
         return self._main_sensor
 
+    @staticmethod
+    @callback
+    def async_get_options_flow(entry: config_entries.ConfigEntry) -> config_entries.OptionsFlow:
+        return PowermixOptionsFlowHandler(entry)
+
 
 class PowermixOptionsFlowHandler(config_entries.OptionsFlow):
     def __init__(self, entry: config_entries.ConfigEntry) -> None:
@@ -118,7 +124,3 @@ class PowermixOptionsFlowHandler(config_entries.OptionsFlow):
             }
         )
         return self.async_show_form(step_id="init", data_schema=schema)
-
-
-def async_get_options_flow(entry: config_entries.ConfigEntry) -> PowermixOptionsFlowHandler:
-    return PowermixOptionsFlowHandler(entry)
