@@ -178,3 +178,38 @@ async def test_other_sensor_allows_negative_only_when_producers_present(dummy_ha
     sensor_with_prod.hass = hass
     sensor_with_prod._refresh_state()  # type: ignore[attr-defined]
     assert sensor_with_prod.native_value == -50.0
+
+
+@pytest.mark.asyncio
+async def test_power_values_are_normalized_to_watts(dummy_hass: DummyHass) -> None:
+    hass = dummy_hass
+    hass.states.set("sensor.main", "1.5", {"unit_of_measurement": "kW"})
+    hass.states.set("sensor.consumer", "250", {"unit_of_measurement": "W"})
+    hass.states.set(
+        "sensor.producer",
+        "0.5",
+        {"unit_of_measurement": "kW", "friendly_name": "PV"},
+    )
+
+    sensor = PowermixOtherSensor(
+        "entry123",
+        "Powermix",
+        "sensor.main",
+        ["sensor.consumer"],
+        ["sensor.producer"],
+    )
+    sensor.hass = hass
+    sensor._refresh_state()  # type: ignore[attr-defined]
+    assert sensor.native_value == 1250.0  # 1500 W - 250 W
+    assert sensor.native_unit_of_measurement == "W"
+
+    mirror = PowermixMirrorSensor(
+        "entry123",
+        "Powermix",
+        "sensor.producer",
+        role="producer",
+    )
+    mirror.hass = hass
+    mirror._sync_from_source()  # type: ignore[attr-defined]
+    assert mirror.native_value == 500.0  # 0.5 kW -> 500 W
+    assert mirror.native_unit_of_measurement == "W"

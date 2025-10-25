@@ -1,6 +1,6 @@
 # Powermix
 
-Home Assistant custom integration that mirrors selected power sensors and creates an "other" sensor showing the remainder of a main power feed. Use it to build Grafana dashboards with a consistent set of prefixed sensors while keeping the heavy calculations inside Home Assistant before the data hits InfluxDB.
+Home Assistant custom integration that mirrors selected power sensors and creates an "other" sensor showing the remainder of a main power feed. Use it to build Grafana dashboards with a consistent set of prefixed sensors while keeping the heavy calculations inside Home Assistant before the data hits InfluxDB. Any inputs reported in kW are automatically converted to Watts so every mirrored entity shares the same unit.
 
 ## HACS installation
 

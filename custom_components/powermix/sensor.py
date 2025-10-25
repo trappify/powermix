@@ -117,16 +117,17 @@ class PowermixOtherSensor(PowermixBaseSensor):
     def _refresh_state(self) -> None:
         main_state = self._get_state(self._main_sensor)
         selected_states = [self._get_state(entity) for entity in self._selected]
-        main_value = main_state.state if main_state else None
-        part_values = [state.state if state else None for state in selected_states]
+        main_value, unit = _value_in_watts(main_state)
+        part_values = []
+        for state in selected_states:
+            value, _ = _value_in_watts(state)
+            part_values.append(value)
         self._native_value = calculate_other(
             main_value,
             part_values,
             allow_negative=self._allow_negative,
         )
-        if main_state:
-            unit = main_state.attributes.get("unit_of_measurement")
-            self._attr_native_unit_of_measurement = unit
+        self._attr_native_unit_of_measurement = unit
 
     def _get_state(self, entity_id: str) -> State | None:
         return self.hass.states.get(entity_id)
@@ -178,10 +179,9 @@ class PowermixMirrorSensor(PowermixBaseSensor):
         state = self.hass.states.get(self._source_entity_id)
         friendly_name = None
         if state:
-            self._native_value = coerce_float(state.state)
-            self._attr_native_unit_of_measurement = state.attributes.get(
-                "unit_of_measurement"
-            )
+            value, unit = _value_in_watts(state)
+            self._native_value = value
+            self._attr_native_unit_of_measurement = unit
             friendly_name = state.attributes.get("friendly_name")
         else:
             self._native_value = None
@@ -194,3 +194,37 @@ class PowermixMirrorSensor(PowermixBaseSensor):
 
 def _slugify(value: str) -> str:
     return value.lower().replace(".", "_").replace(" ", "_")
+
+
+def _value_in_watts(state: State | None) -> tuple[float | None, str | None]:
+    if not state:
+        return None, None
+    value = coerce_float(state.state)
+    unit_attr = state.attributes.get("unit_of_measurement")
+    normalized = _normalize_unit(unit_attr)
+    if value is None:
+        return None, _unit_label(normalized, unit_attr)
+    if normalized == "kW":
+        return value * 1000.0, "W"
+    if normalized == "W":
+        return value, "W"
+    return value, unit_attr
+
+
+def _normalize_unit(unit: str | None) -> str | None:
+    if not unit:
+        return None
+    text = str(unit).strip().lower()
+    if text in {"kw", "kilowatt", "kilowatts"}:
+        return "kW"
+    if text in {"w", "watt", "watts"}:
+        return "W"
+    return None
+
+
+def _unit_label(normalized: str | None, original: str | None) -> str | None:
+    if normalized == "W":
+        return "W"
+    if normalized == "kW":
+        return "W"
+    return original

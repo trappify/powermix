@@ -12,7 +12,7 @@
 ## Operational Notes
 - All sensors produced by the integration share a configurable prefix so downstream tooling can filter on it.
 - The integration listens to state changes for the selected sensors and recomputes values immediately; there is no polling interval.
-- Selected sensors must be normal Home Assistant `sensor` entities with power readings (Watts). Empty/unknown source states are treated as zero for the mirrored entities and excluded from the "other" calculation. Producers are optional and only needed if you want the "Other" sensor to reflect export periods.
+- Selected sensors must be normal Home Assistant `sensor` entities with power readings (Watts). Empty/unknown source states are treated as zero for the mirrored entities and excluded from the "other" calculation. Producers are optional and only needed if you want the "Other" sensor to reflect export periods. Powermix automatically normalizes any source sensor that reports in kW down to Watts.
 
 ## Testing
 ```bash

@@ -4,7 +4,7 @@
    `custom_components/powermix` directory into your Home Assistant `config/custom_components` folder.
 2. Restart Home Assistant and add **Powermix** from *Settings → Devices & Services*.
 3. Pick the **main power sensor** (typically your total household consumption sensor).
-4. Choose the **consumer sensors to subtract**. Powermix mirrors each selection with the configured prefix and subtracts their values from the main power sensor to derive the *Other Usage* sensor.
+4. Choose the **consumer sensors to subtract**. Powermix mirrors each selection with the configured prefix and subtracts their values from the main power sensor to derive the *Other Usage* sensor. Values reported in kW are automatically converted to Watts.
 5. (Optional) Select any **producer sensors** (PV arrays, batteries, etc.). Producer mirrors share the same prefix, and their presence allows *Other Usage* to go negative so export periods show up in dashboards.
 6. Set the **prefix** you want Powermix to apply to every created sensor. This makes it easy to locate them in Grafana or any downstream database.
 
