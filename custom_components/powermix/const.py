@@ -7,6 +7,7 @@ SENSOR_DOMAIN = "sensor"
 
 CONF_MAIN_SENSOR = "main_sensor"
 CONF_INCLUDED_SENSORS = "included_sensors"
+CONF_PRODUCER_SENSORS = "producer_sensors"
 CONF_SENSOR_PREFIX = "sensor_prefix"
 
 DEFAULT_SENSOR_PREFIX = "Powermix"

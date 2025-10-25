@@ -18,3 +18,7 @@ def test_calculate_other_with_missing_values() -> None:
 
 def test_calculate_other_never_negative() -> None:
     assert calculate_other(10, [8, 5]) == 0.0
+
+
+def test_calculate_other_allows_negative_when_requested() -> None:
+    assert calculate_other(10, [15], allow_negative=True) == -5.0

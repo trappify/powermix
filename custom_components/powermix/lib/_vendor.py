@@ -21,7 +21,9 @@ def coerce_float(value: NumberLike) -> float | None:
     return None
 
 
-def calculate_other(main: NumberLike, parts: list[NumberLike]) -> float | None:
+def calculate_other(
+    main: NumberLike, parts: list[NumberLike], *, allow_negative: bool = False
+) -> float | None:
     main_value = coerce_float(main)
     if main_value is None:
         return None
@@ -33,4 +35,7 @@ def calculate_other(main: NumberLike, parts: list[NumberLike]) -> float | None:
             total += parsed
 
     remaining = main_value - total
-    return max(0.0, round(remaining, 3))
+    result = round(remaining, 3)
+    if not allow_negative:
+        return max(0.0, result)
+    return result

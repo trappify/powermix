@@ -13,6 +13,7 @@ from homeassistant.helpers import selector
 from .const import (
     CONF_INCLUDED_SENSORS,
     CONF_MAIN_SENSOR,
+    CONF_PRODUCER_SENSORS,
     CONF_SENSOR_PREFIX,
     DEFAULT_SENSOR_PREFIX,
     DOMAIN,
@@ -49,11 +50,16 @@ class PowermixConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             include = user_input.get(CONF_INCLUDED_SENSORS, []) or []
+            producers = user_input.get(CONF_PRODUCER_SENSORS, []) or []
             prefix = user_input.get(CONF_SENSOR_PREFIX, DEFAULT_SENSOR_PREFIX)
             filtered = [entity for entity in include if entity != self._main_sensor]
+            producer_filtered = [
+                entity for entity in producers if entity != self._main_sensor
+            ]
             data = {
                 CONF_MAIN_SENSOR: self._main_sensor,
                 CONF_INCLUDED_SENSORS: filtered,
+                CONF_PRODUCER_SENSORS: producer_filtered,
                 CONF_SENSOR_PREFIX: prefix.strip() or DEFAULT_SENSOR_PREFIX,
             }
             friendly_title = await self._main_sensor_title()
@@ -63,6 +69,14 @@ class PowermixConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         schema = vol.Schema(
             {
                 vol.Optional(CONF_INCLUDED_SENSORS, default=[]): selector.EntitySelector(
+                    selector.EntitySelectorConfig(
+                        domain=[SENSOR_DOMAIN],
+                        device_class=["power"],
+                        multiple=True,
+                        exclude_entities=[self._main_sensor],
+                    )
+                ),
+                vol.Optional(CONF_PRODUCER_SENSORS, default=[]): selector.EntitySelector(
                     selector.EntitySelectorConfig(
                         domain=[SENSOR_DOMAIN],
                         device_class=["power"],
@@ -98,12 +112,23 @@ class PowermixOptionsFlowHandler(config_entries.OptionsFlow):
         main_sensor = base[CONF_MAIN_SENSOR]
         current_include = base.get(CONF_INCLUDED_SENSORS, [])
         current_prefix = base.get(CONF_SENSOR_PREFIX, DEFAULT_SENSOR_PREFIX)
+        current_producers = base.get(CONF_PRODUCER_SENSORS, [])
 
         if user_input is not None:
-            include = [entity for entity in user_input.get(CONF_INCLUDED_SENSORS, []) if entity != main_sensor]
+            include = [
+                entity
+                for entity in user_input.get(CONF_INCLUDED_SENSORS, [])
+                if entity != main_sensor
+            ]
             prefix = user_input.get(CONF_SENSOR_PREFIX, DEFAULT_SENSOR_PREFIX)
+            producers = [
+                entity
+                for entity in user_input.get(CONF_PRODUCER_SENSORS, [])
+                if entity != main_sensor
+            ]
             data = {
                 CONF_INCLUDED_SENSORS: include,
+                CONF_PRODUCER_SENSORS: producers,
                 CONF_SENSOR_PREFIX: prefix.strip() or DEFAULT_SENSOR_PREFIX,
             }
             return self.async_create_entry(title="", data=data)
@@ -112,6 +137,16 @@ class PowermixOptionsFlowHandler(config_entries.OptionsFlow):
             {
                 vol.Optional(
                     CONF_INCLUDED_SENSORS, default=current_include
+                ): selector.EntitySelector(
+                    selector.EntitySelectorConfig(
+                        domain=[SENSOR_DOMAIN],
+                        device_class=["power"],
+                        multiple=True,
+                        exclude_entities=[main_sensor],
+                    )
+                ),
+                vol.Optional(
+                    CONF_PRODUCER_SENSORS, default=current_producers
                 ): selector.EntitySelector(
                     selector.EntitySelectorConfig(
                         domain=[SENSOR_DOMAIN],

@@ -12,7 +12,8 @@
         "title": "Breakdown sensors",
         "description": "Choose the sensors you want to subtract and set the prefix for mirrored entities.",
         "data": {
-          "included_sensors": "Sensors to subtract",
+          "included_sensors": "Consumers to subtract",
+          "producer_sensors": "Producer sensors (PV, battery, etc.)",
           "sensor_prefix": "Sensor prefix"
         }
       }
@@ -24,7 +25,8 @@
         "title": "Adjust Powermix sensors",
         "description": "Update the included sensors or change the prefix.",
         "data": {
-          "included_sensors": "Sensors to subtract",
+          "included_sensors": "Consumers to subtract",
+          "producer_sensors": "Producer sensors (PV, battery, etc.)",
           "sensor_prefix": "Sensor prefix"
         }
       }

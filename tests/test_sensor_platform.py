@@ -10,6 +10,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 from custom_components.powermix.const import (
     CONF_INCLUDED_SENSORS,
     CONF_MAIN_SENSOR,
+    CONF_PRODUCER_SENSORS,
     CONF_SENSOR_PREFIX,
     DEFAULT_SENSOR_PREFIX,
     DOMAIN,
@@ -42,6 +43,7 @@ async def test_async_setup_entry_adds_other_and_mirror_entities(dummy_hass: Dumm
     config = {
         CONF_MAIN_SENSOR: "sensor.main",
         CONF_INCLUDED_SENSORS: ["sensor.ev", "sensor.ev"],  # duplicates are OK here
+        CONF_PRODUCER_SENSORS: ["sensor.pv"],
         CONF_SENSOR_PREFIX: DEFAULT_SENSOR_PREFIX,
     }
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {"config": config}
@@ -53,9 +55,12 @@ async def test_async_setup_entry_adds_other_and_mirror_entities(dummy_hass: Dumm
 
     await async_setup_entry(hass, entry, add_entities)
 
-    assert len(added) == 3  # 1 other sensor + 2 mirrors (duplicates preserved intentionally)
+    assert len(added) == 4  # 1 other sensor + 2 consumer mirrors + 1 producer mirror
     assert isinstance(added[0], PowermixOtherSensor)
     assert all(isinstance(entity, PowermixMirrorSensor) for entity in added[1:])
+    roles = [entity.extra_state_attributes["sensor_role"] for entity in added[1:]]
+    assert roles.count("consumer") == 2
+    assert roles.count("producer") == 1
 
 
 @pytest.mark.asyncio
@@ -79,6 +84,7 @@ async def test_other_sensor_refreshes_from_tracked_states(dummy_hass: DummyHass)
         "Powermix",
         "sensor.main",
         ["sensor.heat_pump", "sensor.ev", "sensor.main"],
+        ["sensor.pv"],
     )
     sensor.hass = hass
 
@@ -94,6 +100,7 @@ async def test_other_sensor_refreshes_from_tracked_states(dummy_hass: DummyHass)
         "sensor.heat_pump",
         "sensor.ev",
     ]
+    assert sensor.extra_state_attributes["producer_sensors"] == ["sensor.pv"]
     assert sensor.native_unit_of_measurement == "W"
     assert tracker["entities"] == ["sensor.main", "sensor.heat_pump", "sensor.ev"]
 
@@ -121,7 +128,9 @@ async def test_mirror_sensor_tracks_source_and_updates_name(dummy_hass: DummyHas
         recorded["action"] = action
         return lambda: None
 
-    sensor = PowermixMirrorSensor("entry123", "Powermix", "sensor.server_rack")
+    sensor = PowermixMirrorSensor(
+        "entry123", "Powermix", "sensor.server_rack", role="consumer"
+    )
     sensor.hass = hass
 
     with patch(
@@ -133,9 +142,39 @@ async def test_mirror_sensor_tracks_source_and_updates_name(dummy_hass: DummyHas
     assert sensor.native_unit_of_measurement == "W"
     assert sensor.name == "Powermix Server Rack"
     assert recorded["entities"] == ["sensor.server_rack"]
+    assert sensor.extra_state_attributes["sensor_role"] == "consumer"
 
     hass.states.remove("sensor.server_rack")
     recorded["action"](None)
     assert sensor.native_value is None
     # Name stays at last friendly name even if the source disappears.
     assert sensor.name == "Powermix Server Rack"
+
+
+@pytest.mark.asyncio
+async def test_other_sensor_allows_negative_only_when_producers_present(dummy_hass: DummyHass) -> None:
+    hass = dummy_hass
+    hass.states.set("sensor.main", "100", {"unit_of_measurement": "W"})
+    hass.states.set("sensor.consumer", "150", {})
+
+    sensor_no_prod = PowermixOtherSensor(
+        "entry1",
+        "Powermix",
+        "sensor.main",
+        ["sensor.consumer"],
+        [],
+    )
+    sensor_no_prod.hass = hass
+    sensor_no_prod._refresh_state()  # type: ignore[attr-defined]
+    assert sensor_no_prod.native_value == 0.0
+
+    sensor_with_prod = PowermixOtherSensor(
+        "entry2",
+        "Powermix",
+        "sensor.main",
+        ["sensor.consumer"],
+        ["sensor.pv"],
+    )
+    sensor_with_prod.hass = hass
+    sensor_with_prod._refresh_state()  # type: ignore[attr-defined]
+    assert sensor_with_prod.native_value == -50.0

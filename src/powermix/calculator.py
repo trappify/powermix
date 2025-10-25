@@ -31,13 +31,19 @@ def coerce_float(value: NumberLike) -> float | None:
     return None
 
 
-def calculate_other(main: NumberLike, parts: Sequence[NumberLike]) -> float | None:
+def calculate_other(
+    main: NumberLike,
+    parts: Sequence[NumberLike],
+    *,
+    allow_negative: bool = False,
+) -> float | None:
     """Return the ``main`` value minus the sum of ``parts``.
 
     ``None`` or unparseable values in ``parts`` are ignored. If ``main`` cannot
-    be parsed the function returns ``None``. The result never falls below zero to
-    keep the derived sensor from showing negative power consumption when the
-    individual sensors temporarily sum to more than the main sensor.
+    be parsed the function returns ``None``. When ``allow_negative`` is ``False``
+    (default) the result is clamped at zero so the derived sensor never shows
+    negative usage. Callers that model local production can set
+    ``allow_negative=True`` to expose export periods.
     """
 
     main_value = coerce_float(main)
@@ -51,4 +57,7 @@ def calculate_other(main: NumberLike, parts: Sequence[NumberLike]) -> float | No
             total += parsed
 
     remaining = main_value - total
-    return max(0.0, round(remaining, 3))
+    result = round(remaining, 3)
+    if not allow_negative:
+        return max(0.0, result)
+    return result

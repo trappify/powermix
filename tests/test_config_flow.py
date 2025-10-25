@@ -11,6 +11,7 @@ from custom_components.powermix.config_flow import (
 from custom_components.powermix.const import (
     CONF_INCLUDED_SENSORS,
     CONF_MAIN_SENSOR,
+    CONF_PRODUCER_SENSORS,
     CONF_SENSOR_PREFIX,
     DEFAULT_SENSOR_PREFIX,
     DOMAIN,
@@ -44,6 +45,10 @@ async def test_config_flow_filters_main_sensor_and_uses_friendly_title() -> None
                 "sensor.total_power",  # should be stripped
                 "sensor.ev",
             ],
+            CONF_PRODUCER_SENSORS: [
+                "sensor.pv",
+                "sensor.total_power",
+            ],
             CONF_SENSOR_PREFIX: "   ",
         }
     )
@@ -54,6 +59,7 @@ async def test_config_flow_filters_main_sensor_and_uses_friendly_title() -> None
     assert data[CONF_MAIN_SENSOR] == "sensor.total_power"
     # Duplicates preserved, but the main sensor is filtered out.
     assert data[CONF_INCLUDED_SENSORS] == ["sensor.ev", "sensor.ev"]
+    assert data[CONF_PRODUCER_SENSORS] == ["sensor.pv"]
     assert data[CONF_SENSOR_PREFIX] == DEFAULT_SENSOR_PREFIX
 
 
@@ -64,6 +70,7 @@ async def test_options_flow_updates_include_and_prefix() -> None:
         data={
             CONF_MAIN_SENSOR: "sensor.total_power",
             CONF_INCLUDED_SENSORS: ["sensor.ev"],
+            CONF_PRODUCER_SENSORS: ["sensor.pv"],
             CONF_SENSOR_PREFIX: "Powermix",
         },
     )
@@ -79,6 +86,11 @@ async def test_options_flow_updates_include_and_prefix() -> None:
                 "sensor.heat_pump",
                 "sensor.total_power",
             ],
+            CONF_PRODUCER_SENSORS: [
+                "sensor.pv",
+                "sensor.battery",
+                "sensor.total_power",
+            ],
             CONF_SENSOR_PREFIX: " Custom Prefix ",
         }
     )
@@ -86,4 +98,5 @@ async def test_options_flow_updates_include_and_prefix() -> None:
     assert result["type"] == FlowResultType.CREATE_ENTRY
     options = result["data"]
     assert options[CONF_INCLUDED_SENSORS] == ["sensor.ev", "sensor.heat_pump"]
+    assert options[CONF_PRODUCER_SENSORS] == ["sensor.pv", "sensor.battery"]
     assert options[CONF_SENSOR_PREFIX] == "Custom Prefix"
