@@ -2,6 +2,10 @@
 
 Home Assistant custom integration that mirrors selected power sensors and creates an "other" sensor showing the remainder of a main power feed. Use it to build Grafana dashboards with a consistent set of prefixed sensors while keeping the heavy calculations inside Home Assistant before the data hits InfluxDB.
 
+## HACS installation
+
+Powermix ships as a HACS-compatible custom integration. Add `https://github.com/trappify/powermix` to **HACS → Integrations → Custom repositories**, install **Powermix**, restart Home Assistant, and add the integration via *Settings → Devices & Services*. See `docs/configuration.md` for a walkthrough of the setup flow (main sensor, consumer sensors, optional producer sensors, and the shared prefix).
+
 ## Local development
 
 ```bash
